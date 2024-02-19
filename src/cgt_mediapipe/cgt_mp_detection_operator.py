@@ -2,6 +2,10 @@ import bpy
 import logging
 from typing import Optional
 from pathlib import Path
+
+from .cgt_mp_core import mp_pose_loader_node
+from .cgt_mp_core.cv_stream import Stream
+from .cgt_mp_core.mp_pose_loader_node import PoseLoaderNode
 from ..cgt_core.cgt_patterns import cgt_nodes
 
 
@@ -25,7 +29,7 @@ class WM_CGT_MP_modal_detection_operator(bpy.types.Operator):
 
         input_node = None
         chain_template = None
-
+        print(f"{self.user.enum_detection_type}")
         logging.debug(f"{self.user.enum_detection_type}")
         if self.user.enum_detection_type == 'HAND':
             input_node = mp_hand_detector.HandDetector(
@@ -45,12 +49,19 @@ class WM_CGT_MP_modal_detection_operator(bpy.types.Operator):
             )
             chain_template = cgt_core_chains.FaceNodeChain()
 
-        elif self.user.enum_detection_type == 'HOLISTIC':
-            input_node = mp_holistic_detector.HolisticDetector(
-                stream, self.user.holistic_model_complexity,
-                self.user.min_detection_confidence, self.user.refine_face_landmarks
-            )
-            chain_template = cgt_core_chains.HolisticNodeChainGroup()
+        elif self.user.enum_detection_type_pose == 'HOLISTIC':
+            print(f"Stream: {type(stream)}")
+            if type(stream) is str:
+                print(type(stream))
+                path = stream
+                input_node = PoseLoaderNode(path)
+                chain_template = cgt_core_chains.HolisticNodeChainGroup()
+            else:
+                input_node = mp_holistic_detector.HolisticDetector(
+                    stream, self.user.holistic_model_complexity,
+                    self.user.min_detection_confidence, self.user.refine_face_landmarks
+                )
+                chain_template = cgt_core_chains.HolisticNodeChainGroup()
 
         if input_node is None or chain_template is None:
             self.report(
@@ -68,6 +79,7 @@ class WM_CGT_MP_modal_detection_operator(bpy.types.Operator):
         self.key_step = self.user.key_frame_step
 
         self.frame = bpy.context.scene.frame_current
+        print(self.user.detection_input_type)
         if self.user.detection_input_type == 'movie':
             mov_path = bpy.path.abspath(self.user.mov_data_path)
             logging.info(f"Path to mov: {mov_path}")
@@ -78,7 +90,7 @@ class WM_CGT_MP_modal_detection_operator(bpy.types.Operator):
 
             stream = cv_stream.Stream(str(mov_path), "Movie Detection")
 
-        else:
+        elif self.user.detection_input_type == 'webcam':
             camera_index = self.user.webcam_input_device
             dim = self.user.enum_stream_dim
             dimensions = {
@@ -92,6 +104,18 @@ class WM_CGT_MP_modal_detection_operator(bpy.types.Operator):
                 capture_input=camera_index, backend=backend,
                 width=dimensions[dim][0], height=dimensions[dim][1],
             )
+        elif self.user.detection_input_type == 'pose':
+            pose_path = bpy.path.abspath(self.user.pose_data_path)
+            logging.info(f"Path to pose: {pose_path}")
+            if not Path(pose_path).is_file():
+                self.user.modal_active = False
+                logging.error(f"GIVEN PATH IS NOT VALID {pose_path}")
+                return {'FINISHED'}
+
+            print(pose_path)
+            return pose_path
+        else:
+            return None
         return stream
 
     def execute(self, context):
@@ -188,11 +212,21 @@ class WM_CGT_MP_modal_detection_operator(bpy.types.Operator):
                     self.memo.clear()
 
                 self.frame += 1
-            else:
+            elif self.user.detection_input_type == 'webcam':
                 data, _ = self.node_chain.update([], self.frame)
                 if data is None:
                     return self.cancel(context)
                 self.frame += self.key_step
+            elif self.user.detection_input_type == 'pose':
+                print(f'load pose and return in stream from')
+                print(self.node_chain)
+
+                data, _frame = self.node_chain.nodes[0].update([], self.frame)
+
+                for node in self.node_chain.nodes[1:]:
+                    node.update(self.memo, self.frame)
+                if data is None:
+                    return self.cancel(context)
 
         if event.type in {'Q', 'ESC', 'RIGHT_MOUSE'} or self.user.modal_active is False:
             return self.cancel(context)

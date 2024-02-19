@@ -4,6 +4,7 @@ from . import cv_stream, mp_detector_node
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
+import logging
 
 class HolisticDetector(mp_detector_node.DetectorNode):
     def __init__(self, stream, model_complexity: int = 1,
@@ -29,6 +30,7 @@ class HolisticDetector(mp_detector_node.DetectorNode):
         return [[[], []], [[[]]], []]
 
     def detected_data(self, mp_res):
+        #print(f"Detected data: {mp_res}")
         face, pose, l_hand, r_hand = [], [], [], []
         if mp_res.pose_landmarks:
             pose = self.cvt2landmark_array(mp_res.pose_landmarks)
@@ -38,6 +40,7 @@ class HolisticDetector(mp_detector_node.DetectorNode):
             l_hand = [self.cvt2landmark_array(mp_res.left_hand_landmarks)]
         if mp_res.right_hand_landmarks:
             r_hand = [self.cvt2landmark_array(mp_res.right_hand_landmarks)]
+        print(f"Detected data: {[[r_hand, l_hand], [face], pose]}")
         # TODO: recheck every update, mp hands are flipped while detecting holistic.
         return [[r_hand, l_hand], [face], pose]
 

@@ -14,6 +14,14 @@ class MP_PG_Properties(bpy.types.PropertyGroup):
         )
     )
 
+    enum_detection_type_pose: bpy.props.EnumProperty(
+        name="Target",
+        description="Select detection type tracking.",
+        items=(
+            ("HOLISTIC", "Holistic", ""),
+        )
+    )
+
     refine_face_landmarks: bpy.props.BoolProperty(
         name="Refine Face Landmarks", default=False,
         description="Whether to further refine the landmark coordinates "
@@ -60,6 +68,15 @@ class MP_PG_Properties(bpy.types.PropertyGroup):
         subtype='FILE_PATH'
     )
 
+    pose_data_path: bpy.props.StringProperty(
+        name="File Path",
+        description="File path to .pose file.",
+        default='*.pose',
+        options={'HIDDEN'},
+        maxlen=1024,
+        subtype='FILE_PATH'
+    )
+
     enum_stream_type: bpy.props.EnumProperty(
         name="Stream Backend",
         description="Sets Stream backend.",
@@ -85,6 +102,7 @@ class MP_PG_Properties(bpy.types.PropertyGroup):
         items=(
             ("movie", "Movie", ""),
             ("stream", "Webcam", ""),
+            ("pose", "Pose", ""),
         )
     )
 

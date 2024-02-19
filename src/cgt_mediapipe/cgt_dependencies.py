@@ -308,21 +308,24 @@ if sys.platform == 'darwin' and platform.processor() == 'arm':
     required_dependencies = [
         Dependency(module="opencv-contrib-python==4.7.0.68", name="cv2", pkg="opencv_contrib_python", args=None),
         Dependency(module="protobuf==3.20.3", name="google.protobuf", pkg="protobuf", args=None),
-        Dependency(module="mediapipe-silicon==0.8.11", name="mediapipe", pkg="mediapipe-silicon", args=None)
+        Dependency(module="mediapipe-silicon==0.8.11", name="mediapipe", pkg="mediapipe-silicon", args=None),
+        Dependency(module="pose-format==0.3.0", name="pose_format", pkg="pose_format", args=None)
     ]
 
 elif sys.platform == 'win32':
     required_dependencies = [
         Dependency(module="opencv-contrib-python==4.7.0.68", name="cv2", pkg="opencv_contrib_python", args=None),
         Dependency(module="protobuf==3.20.3", name="google.protobuf", pkg="protobuf", args=None),
-        Dependency(module="mediapipe==0.9.0.1", name="mediapipe", pkg="mediapipe", args=None)
+        Dependency(module="mediapipe==0.9.0.1", name="mediapipe", pkg="mediapipe", args=None),
+        Dependency(module="pose-format==0.3.0", name="pose_format", pkg="pose_format", args=None)
     ]
 
 elif sys.platform == 'linux':
     required_dependencies = [
         Dependency(module="opencv-contrib-python==4.5.5.64", name="cv2", pkg="opencv_contrib_python", args=None),
         Dependency(module="protobuf==3.20.3", name="google.protobuf", pkg="protobuf", args=None),
-        Dependency(module="mediapipe==0.9.0.1", name="mediapipe", pkg="mediapipe", args=None)
+        Dependency(module="mediapipe==0.9.0.1", name="mediapipe", pkg="mediapipe", args=None),
+        Dependency(module="pose-format==0.3.0", name="pose_format", pkg="pose_format", args=None)
     ]
 
 # legacy mac
@@ -349,6 +352,7 @@ elif sys.platform == 'darwin':
         Dependency(module="opencv-contrib-python==4.5.5.64", name="cv2", pkg="opencv_contrib_python", args=None),
         Dependency(module="protobuf==3.20.2", name="google.protobuf", pkg="protobuf", args=None),
         Dependency(module="mediapipe==0.8.10", name="mediapipe", pkg="mediapipe", args=["--no-deps"]),
+        Dependency(module="pose-format==0.3.0", name="pose_format", pkg="pose_format", args=None)
     ]
 
 

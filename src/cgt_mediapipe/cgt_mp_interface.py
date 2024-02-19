@@ -24,6 +24,15 @@ class CGT_PT_MP_Detection(cgt_core_panel.DefaultPanel, bpy.types.Panel):
         else:
             layout.row().operator("wm.cgt_feature_detection_operator", text="Detect Clip", icon='IMPORT')
 
+    def pose_panel(self, user):
+        layout = self.layout
+        layout.row().prop(user, "pose_data_path")
+        layout.row().prop(user, "enum_detection_type")
+        if user.modal_active:
+            layout.row().operator("wm.cgt_feature_detection_operator", text="Stop Detection", icon='CANCEL')
+        else:
+            layout.row().operator("wm.cgt_feature_detection_operator", text="Load Clip", icon='IMPORT')
+
     def webcam_panel(self, user):
         layout = self.layout
         layout.row().prop(user, "webcam_input_device")
@@ -42,8 +51,10 @@ class CGT_PT_MP_Detection(cgt_core_panel.DefaultPanel, bpy.types.Panel):
 
         if user.detection_input_type == "movie":
             self.movie_panel(user)
-        else:
+        elif user.detection_input_type == "stream":
             self.webcam_panel(user)
+        else:
+            self.pose_panel(user)
 
 
 class CGT_PT_MP_DetectorProperties(cgt_core_panel.DefaultPanel, bpy.types.Panel):
