@@ -55,6 +55,8 @@ class NodeChainGroup(Node):
     # @timeit
     def update(self, data: Any, frame: int) -> Tuple[Optional[Any], int]:
         """ Push data in their designed node chains. """
+
+        print(len(data), len(self.nodes))
         assert len(data) == len(self.nodes)
 
         updated_data = []

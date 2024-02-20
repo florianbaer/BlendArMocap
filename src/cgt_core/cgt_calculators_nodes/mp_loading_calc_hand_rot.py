@@ -1,9 +1,11 @@
+import pdb
+
 import numpy as np
 from . import calc_utils, cgt_math
 from ..cgt_patterns import cgt_nodes
 
 
-class HandRotationCalculator(cgt_nodes.CalculatorNode, calc_utils.ProcessorUtils):
+class HandLoadingRotationCalculator(cgt_nodes.CalculatorNode, calc_utils.ProcessorUtils):
     fingers = [
         [1, 5],  # thumb
         [5, 9],  # index finger
@@ -24,6 +26,7 @@ class HandRotationCalculator(cgt_nodes.CalculatorNode, calc_utils.ProcessorUtils
     right_scale: np.ndarray = None
 
     def init_data(self):
+
         """ Process and map received data from mediapipe before key-framing. """
         self.left_hand_data = self.set_global_origin(self.data[0])
         self.right_hand_data = self.set_global_origin(self.data[1])
@@ -44,7 +47,6 @@ class HandRotationCalculator(cgt_nodes.CalculatorNode, calc_utils.ProcessorUtils
         """ Returns processing results or empty lists. """
         locations = [[], []]
         angles = [[], []]
-
         self.data = data
         self.init_data()
         if self.right_hand_data is not None:
@@ -60,6 +62,7 @@ class HandRotationCalculator(cgt_nodes.CalculatorNode, calc_utils.ProcessorUtils
         return [locations, angles, [[], []]], frame
 
     def finger_angles(self, hand):
+        pdb.set_trace()
         """ Get finger x-angles from landmarks. """
         if not hand or len(hand) < 20:
             return []
@@ -217,7 +220,7 @@ class HandRotationCalculator(cgt_nodes.CalculatorNode, calc_utils.ProcessorUtils
             hand_rotation = ()
 
         return hand_rotation
-# [print(i, t[0].shape) for i, t in data[0]]
+
     def landmarks_to_hands(self, left_hand, right_hand):
         """ Determines to which hand the landmark data belongs """
         left_hand = self.set_global_origin(left_hand)
@@ -226,6 +229,7 @@ class HandRotationCalculator(cgt_nodes.CalculatorNode, calc_utils.ProcessorUtils
 
     @staticmethod
     def set_global_origin(data):
+
         """ Sets the wrist to (0, 0, 0) while the wrist is the origin of the fingers.
             Changes the x-y-z order to match blenders coordinate system. """
         if data is None or len(data) == 0:

@@ -52,7 +52,6 @@ class WM_CGT_MP_modal_detection_operator(bpy.types.Operator):
         elif self.user.enum_detection_type_pose == 'HOLISTIC':
             print(f"Stream: {type(stream)}")
             if type(stream) is str:
-                print(type(stream))
                 path = stream
                 input_node = PoseLoaderNode(path)
                 chain_template = cgt_core_chains.HolisticNodeChainGroup()
@@ -224,10 +223,11 @@ class WM_CGT_MP_modal_detection_operator(bpy.types.Operator):
                 data, _frame = self.node_chain.nodes[0].update([], self.frame)
 
                 for node in self.node_chain.nodes[1:]:
-                    node.update(self.memo, self.frame)
+                    node.update(data, self.frame)
                 if data is None:
                     return self.cancel(context)
 
+                self.frame += 1
         if event.type in {'Q', 'ESC', 'RIGHT_MOUSE'} or self.user.modal_active is False:
             return self.cancel(context)
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import List
 
-from .cgt_calculators_nodes import mp_calc_face_rot, mp_calc_pose_rot, mp_calc_hand_rot
+from .cgt_calculators_nodes import mp_calc_face_rot, mp_calc_pose_rot, mp_calc_hand_rot, mp_loading_calc_face_rot, mp_loading_calc_pose_rot, mp_loading_calc_hand_rot
 from .cgt_output_nodes import mp_hand_out, mp_face_out, mp_pose_out
 from .cgt_patterns import cgt_nodes
 
@@ -27,6 +27,7 @@ class HandNodeChain(cgt_nodes.NodeChain):
         self.append(mp_hand_out.CgtMPHandOutNode())
 
 
+
 class HolisticNodeChainGroup(cgt_nodes.NodeChainGroup):
     nodes: List[cgt_nodes.NodeChain]
 
@@ -35,4 +36,33 @@ class HolisticNodeChainGroup(cgt_nodes.NodeChainGroup):
         self.nodes.append(HandNodeChain())
         self.nodes.append(FaceNodeChain())
         self.nodes.append(PoseNodeChain())
+
+
+class HandLoaderNodeChain(cgt_nodes.NodeChain):
+    def __init__(self):
+        super().__init__()
+        self.append(mp_loading_calc_hand_rot.HandLoadingRotationCalculator())
+        self.append(mp_hand_out.CgtMPHandOutNode())
+
+class FaceLoaderNodeChain(cgt_nodes.NodeChain):
+    def __init__(self):
+        super().__init__()
+        self.append(mp_loading_calc_face_rot.FaceLoadingRotationCalculator())
+        self.append(mp_face_out.MPFaceOutputNode())
+
+class PoseLoaderNodeChain(cgt_nodes.NodeChain):
+    def __init__(self):
+        super().__init__()
+        self.append(mp_loading_calc_pose_rot.PoseLoadingRotationCalculator())
+        self.append(mp_pose_out.MPPoseOutputNode())
+
+
+class HolisticLoaderNodeChainGroup(cgt_nodes.NodeChainGroup):
+    nodes: List[cgt_nodes.NodeChain]
+
+    def __init__(self):
+        super().__init__()
+        self.nodes.append(HandLoaderNodeChain())
+        self.nodes.append(FaceLoaderNodeChain())
+        self.nodes.append(PoseLoaderNodeChain())
 
