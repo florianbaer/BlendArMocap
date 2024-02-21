@@ -10,15 +10,14 @@ class PoseLoaderNode(mp_loader_node.LoaderNode):
     def __init__(self, path, refine_face_landmarks: bool = False):
         self.path = path
 
-        from .pose_dim import restore_dimensions
+        from .pose_dim import restore_dimensions, restore_dimensions_div
         from pose_format import Pose
         self.pose = None
         with open(self.path, "rb") as f:
             self.pose = Pose.read(f.read())
             #self.pose = restore_dimensions(self.pose, width=self.pose.body.dimensions.width, height=self.pose.header.dimensions.height)
             #self.pose.body = self.pose.body.zero_filled()
-            self.pose.body.data = self.pose.body.data
-        self.solution = mp.solutions.holistic
+        self.pose = restore_dimensions_div(self.pose, width=self.pose.header.dimensions.width, height=self.pose.header.dimensions.height)
         mp_loader_node.LoaderNode.__init__(self, path)
         self.refine_face_landmarks = refine_face_landmarks
 

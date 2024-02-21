@@ -1,4 +1,7 @@
+import pdb
+
 import mediapipe as mp
+import numpy as np
 
 from . import cv_stream, mp_detector_node
 import ssl
@@ -42,7 +45,39 @@ class HolisticDetector(mp_detector_node.DetectorNode):
             r_hand = [self.cvt2landmark_array(mp_res.right_hand_landmarks)]
         print(f"Detected data: {[[r_hand, l_hand], [face], pose]}")
         # TODO: recheck every update, mp hands are flipped while detecting holistic.
-        return [[r_hand, l_hand], [face], pose]
+        return_value = [[r_hand, l_hand], [face], pose]
+#        self.deep_list_analysis(return_value)
+
+        return return_value
+
+    def deep_list_analysis(self, data, depth=0, max_depth=2):
+        if depth == max_depth:
+            return
+        if depth == 0:
+
+            print('')
+
+            print('')
+            print(f"Deep list analysis starting")
+            print('')
+
+        new_depth = depth + 1
+        print('Current depth:', depth)
+        next_level = []
+        for d in data:
+            if isinstance(d, list):
+                print(f"List: {len(d)}")
+                next_level.append(d)
+            # check if array
+            elif isinstance(d, np.ndarray):
+                print(f"Numpy array: {d.shape}")
+            else:
+                print(f"Data: {type(d)}")
+
+        print('')
+        for level in next_level:
+            self.deep_list_analysis(level, new_depth)
+
 
     def contains_features(self, mp_res):
         if not mp_res.pose_landmarks:

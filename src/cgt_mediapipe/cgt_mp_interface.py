@@ -27,7 +27,7 @@ class CGT_PT_MP_Detection(cgt_core_panel.DefaultPanel, bpy.types.Panel):
     def pose_panel(self, user):
         layout = self.layout
         layout.row().prop(user, "pose_data_path")
-        layout.row().prop(user, "enum_detection_type")
+        layout.row().prop(user, "enum_detection_type_pose")
         if user.modal_active:
             layout.row().operator("wm.cgt_feature_detection_operator", text="Stop Detection", icon='CANCEL')
         else:

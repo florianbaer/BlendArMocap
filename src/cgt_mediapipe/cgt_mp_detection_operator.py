@@ -1,3 +1,5 @@
+import pdb
+
 import bpy
 import logging
 from typing import Optional
@@ -29,7 +31,6 @@ class WM_CGT_MP_modal_detection_operator(bpy.types.Operator):
 
         input_node = None
         chain_template = None
-        print(f"{self.user.enum_detection_type}")
         logging.debug(f"{self.user.enum_detection_type}")
         if self.user.enum_detection_type == 'HAND':
             input_node = mp_hand_detector.HandDetector(
@@ -49,9 +50,12 @@ class WM_CGT_MP_modal_detection_operator(bpy.types.Operator):
             )
             chain_template = cgt_core_chains.FaceNodeChain()
 
+
         elif self.user.enum_detection_type_pose == 'HOLISTIC':
-            print(f"Stream: {type(stream)}")
-            if type(stream) is str:
+            pdb.set_trace()
+            print(self.user.detection_input_type)
+
+            if self.user.detection_input_type == 'pose':
                 path = stream
                 input_node = PoseLoaderNode(path)
                 chain_template = cgt_core_chains.HolisticNodeChainGroup()
