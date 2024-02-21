@@ -33,7 +33,19 @@ class PoseLoaderNode(mp_loader_node.LoaderNode):
     def empty_data(self):
         return [[[], []], [[[]]], []]
 
+    def print_max_min_mean(self,pose, component_name: str):
+        print(f"Component: {component_name}")
+        masked_array = pose.get_components([component_name]).body.data
+        print(f"Shape: {masked_array.shape}")
+        print(f"Max: {masked_array[~masked_array.mask].max()}")
+        print(f"Min: {masked_array[~masked_array.mask].min()}")
+        print(f"Mean: {masked_array[~masked_array.mask].mean()} \n")
+
     def detected_data(self, pose_data, frame):
+        self.print_max_min_mean(pose_data, 'POSE_LANDMARKS')
+        self.print_max_min_mean(pose_data, 'FACE_LANDMARKS')
+        self.print_max_min_mean(pose_data, 'LEFT_HAND_LANDMARKS')
+        self.print_max_min_mean(pose_data, 'RIGHT_HAND_LANDMARKS')
         pose = self.cvt2landmark_array(pose_data.get_components(['POSE_LANDMARKS']),frame)
         face = self.cvt2landmark_array(pose_data.get_components(['FACE_LANDMARKS']),frame)
         l_hand = [self.cvt2landmark_array(pose_data.get_components(['LEFT_HAND_LANDMARKS']),frame)]

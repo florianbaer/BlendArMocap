@@ -36,6 +36,8 @@ class HolisticDetector(mp_detector_node.DetectorNode):
         #print(f"Detected data: {mp_res}")
         face, pose, l_hand, r_hand = [], [], [], []
         if mp_res.pose_landmarks:
+            print(len(mp_res.pose_landmarks.landmark))
+            print([(landmark.x, landmark.y, landmark.z) for idx, landmark in enumerate(mp_res.pose_landmarks.landmark)])
             pose = self.cvt2landmark_array(mp_res.pose_landmarks)
         if mp_res.face_landmarks:
             face = self.cvt2landmark_array(mp_res.face_landmarks)

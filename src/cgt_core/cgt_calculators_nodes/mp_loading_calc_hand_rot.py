@@ -62,7 +62,6 @@ class HandLoadingRotationCalculator(cgt_nodes.CalculatorNode, calc_utils.Process
         return [locations, angles, [[], []]], frame
 
     def finger_angles(self, hand):
-        pdb.set_trace()
         """ Get finger x-angles from landmarks. """
         if not hand or len(hand) < 20:
             return []

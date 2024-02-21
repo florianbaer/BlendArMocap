@@ -52,7 +52,6 @@ class WM_CGT_MP_modal_detection_operator(bpy.types.Operator):
 
 
         elif self.user.enum_detection_type_pose == 'HOLISTIC':
-            pdb.set_trace()
             print(self.user.detection_input_type)
 
             if self.user.detection_input_type == 'pose':
