@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import logging
 from functools import wraps
 from time import time
 from typing import Callable
@@ -20,7 +22,7 @@ def timeit(func: Callable):
         if len(avg) > 30:
             avg.pop()
 
-        print(f"function: {func.__name__}\ntook: {round(runtime, 5)} sec, avg of {len(avg)}: {sum(avg)/len(avg)} sec\n")
+        logging.debug(f"function: {func.__name__}\ntook: {round(runtime, 5)} sec, avg of {len(avg)}: {sum(avg)/len(avg)} sec\n")
         return result
 
     return wrap
@@ -38,7 +40,7 @@ def fps(func: Callable):
         count += 1
         if time() - start >= 1:
             start = time()
-            print(f"function '{func.__name__}' runs at {count} fps")
+            logging.debug(f"function '{func.__name__}' runs at {count} fps")
             count = 0
 
         return res

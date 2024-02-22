@@ -224,11 +224,16 @@ class WM_CGT_MP_modal_detection_operator(bpy.types.Operator):
                 print(self.node_chain)
 
                 data, _frame = self.node_chain.nodes[0].update([], self.frame)
-
-                for node in self.node_chain.nodes[1:]:
-                    node.update(data, self.frame)
                 if data is None:
+                    print('no data')
                     return self.cancel(context)
+
+                # smooth gathered data
+                self.simple_smoothing(self.memo, data)
+                if self.frame % self.key_step == 0:
+                    for node in self.node_chain.nodes[1:]:
+                        node.update(self.memo, self.frame)
+                    self.memo.clear()
 
                 self.frame += 1
         if event.type in {'Q', 'ESC', 'RIGHT_MOUSE'} or self.user.modal_active is False:

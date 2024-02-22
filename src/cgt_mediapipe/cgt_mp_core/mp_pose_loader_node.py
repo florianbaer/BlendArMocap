@@ -10,21 +10,20 @@ class PoseLoaderNode(mp_loader_node.LoaderNode):
     def __init__(self, path, refine_face_landmarks: bool = False):
         self.path = path
 
-        from .pose_dim import restore_dimensions, restore_dimensions_div
+        from .pose_dim import restore_dimensions_div
         from pose_format import Pose
         self.pose = None
         with open(self.path, "rb") as f:
             self.pose = Pose.read(f.read())
-            #self.pose = restore_dimensions(self.pose, width=self.pose.body.dimensions.width, height=self.pose.header.dimensions.height)
-            #self.pose.body = self.pose.body.zero_filled()
-        self.pose = restore_dimensions_div(self.pose, width=self.pose.header.dimensions.width, height=self.pose.header.dimensions.height)
+            self.pose = restore_dimensions_div(self.pose, width=self.pose.header.dimensions.width, height=self.pose.header.dimensions.height)
+
         mp_loader_node.LoaderNode.__init__(self, path)
         self.refine_face_landmarks = refine_face_landmarks
 
     # https://google.github.io/mediapipe/solutions/holistic#python-solution-api
     def update(self, data, frame):
         # check if we are at the end
-        if self.pose.body.data.shape[0] <= frame:
+        if self.pose.body.data.shape[0] < frame:
             return None, frame
 
         #pose = restore_dimensions(pose, width=pose.header.dimensions.width, height=pose.header.dimensions.height)
@@ -33,19 +32,24 @@ class PoseLoaderNode(mp_loader_node.LoaderNode):
     def empty_data(self):
         return [[[], []], [[[]]], []]
 
-    def print_max_min_mean(self,pose, component_name: str):
+    def print_max_min_mean(self,pose, component_name: str, frame: int):
         print(f"Component: {component_name}")
         masked_array = pose.get_components([component_name]).body.data
-        print(f"Shape: {masked_array.shape}")
-        print(f"Max: {masked_array[~masked_array.mask].max()}")
-        print(f"Min: {masked_array[~masked_array.mask].min()}")
-        print(f"Mean: {masked_array[~masked_array.mask].mean()} \n")
+        frame = frame -1
+        print(f"Frame: {frame}")
+        print(f"Type: {masked_array[frame,0,:,:].dtype}")
+        print(f"Shape: {masked_array[frame,0,:,:].shape}")
+        print(f"Max: {masked_array[frame,0,:,:].max()}")
+        print(f"Min: {masked_array[frame,0,:,:].min()}")
+        print(f"Mean: {masked_array[frame,0,:,:].mean()} \n")
 
     def detected_data(self, pose_data, frame):
-        self.print_max_min_mean(pose_data, 'POSE_LANDMARKS')
-        self.print_max_min_mean(pose_data, 'FACE_LANDMARKS')
-        self.print_max_min_mean(pose_data, 'LEFT_HAND_LANDMARKS')
-        self.print_max_min_mean(pose_data, 'RIGHT_HAND_LANDMARKS')
+        # check if all pose data body data is masked
+        if np.all(pose_data.body.data.mask):
+            return self.empty_data()
+
+        #pose_data.body =pose_data.body.zero_filled()
+        self.print_max_min_mean(pose_data, 'LEFT_HAND_LANDMARKS', frame)
         pose = self.cvt2landmark_array(pose_data.get_components(['POSE_LANDMARKS']),frame)
         face = self.cvt2landmark_array(pose_data.get_components(['FACE_LANDMARKS']),frame)
         l_hand = [self.cvt2landmark_array(pose_data.get_components(['LEFT_HAND_LANDMARKS']),frame)]

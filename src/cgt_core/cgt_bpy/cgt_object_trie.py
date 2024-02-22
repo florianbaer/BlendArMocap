@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import logging
 from typing import Dict, List, Tuple, Any, Optional, Callable
 import bpy
 import numpy as np
@@ -76,27 +78,27 @@ def repr_dict(d: Dict[Any], trie_objects=True) -> str:
             for key, value in branch.__dict__.items():
                 if key == 'next':
                     continue
-                print(f"{tabs}{key}: {value}")
+                logging.debug(f"{tabs}{key}: {value}")
 
             if hasattr(branch, 'next'):
                 if not len(branch.next) > 0:
-                    print(f"{tabs}{closing_bracelet},\n{tabs}{bracelet}")
+                    logging.debug(f"{tabs}{closing_bracelet},\n{tabs}{bracelet}")
                     return
 
-                print(f"{tabs}next:", branch.name, '{')
+                logging.debug(f"{tabs}next:", branch.name, '{')
                 recv(branch.name, branch.next, depth + 1)
 
         # get next dict entries
         elif isinstance(branch, dict):
             if not trie_objects:
-                print(f"{tabs}{name}:", '{')
+                logging.debug(f"{tabs}{name}:", '{')
 
             for name in branch:
                 recv(name, branch[name], depth + 1)
 
         # close dict entry
         tabs = "".join(['\t'] * depth)
-        print(f"{tabs}{closing_bracelet},")
+        logging.debug(f"{tabs}{closing_bracelet},")
 
     print('{')
     for node in d:

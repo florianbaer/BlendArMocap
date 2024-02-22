@@ -1,8 +1,6 @@
 import pdb
-
 import mediapipe as mp
 import numpy as np
-
 from . import cv_stream, mp_detector_node
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -10,23 +8,27 @@ ssl._create_default_https_context = ssl._create_unverified_context
 import logging
 
 class HolisticDetector(mp_detector_node.DetectorNode):
-    def __init__(self, stream, model_complexity: int = 1,
+    def __init__(self, stream, model_complexity: int = 2,
                  min_detection_confidence: float = .7, refine_face_landmarks: bool = False):
-
-        self.solution = mp.solutions.holistic
+        #base constructor
         mp_detector_node.DetectorNode.__init__(self, stream)
+        logging.getLogger().setLevel(logging.DEBUG)
+        self.solution = mp.solutions.holistic
         self.model_complexity = model_complexity
         self.min_detection_confidence = min_detection_confidence
         self.refine_face_landmarks = refine_face_landmarks
 
     # https://google.github.io/mediapipe/solutions/holistic#python-solution-api
     def update(self, data, frame):
+        self.frame = frame
         with self.solution.Holistic(
                 refine_face_landmarks=self.refine_face_landmarks,
                 model_complexity=self.model_complexity,
                 min_detection_confidence=self.min_detection_confidence,
-                static_image_mode=True,
+                static_image_mode=False,
         ) as mp_lib:
+            print(f"Frame: {frame}")
+            logging.debug(f"Frame: {frame}")
             return self.exec_detection(mp_lib), frame
 
     def empty_data(self):
@@ -36,50 +38,18 @@ class HolisticDetector(mp_detector_node.DetectorNode):
         #print(f"Detected data: {mp_res}")
         face, pose, l_hand, r_hand = [], [], [], []
         if mp_res.pose_landmarks:
-            print(len(mp_res.pose_landmarks.landmark))
-            print([(landmark.x, landmark.y, landmark.z) for idx, landmark in enumerate(mp_res.pose_landmarks.landmark)])
             pose = self.cvt2landmark_array(mp_res.pose_landmarks)
         if mp_res.face_landmarks:
             face = self.cvt2landmark_array(mp_res.face_landmarks)
         if mp_res.left_hand_landmarks:
-            l_hand = [self.cvt2landmark_array(mp_res.left_hand_landmarks)]
+            l_hand = [self.cvt2landmark_array(mp_res.left_hand_landmarks, self.frame)]
         if mp_res.right_hand_landmarks:
             r_hand = [self.cvt2landmark_array(mp_res.right_hand_landmarks)]
-        print(f"Detected data: {[[r_hand, l_hand], [face], pose]}")
         # TODO: recheck every update, mp hands are flipped while detecting holistic.
         return_value = [[r_hand, l_hand], [face], pose]
 #        self.deep_list_analysis(return_value)
 
         return return_value
-
-    def deep_list_analysis(self, data, depth=0, max_depth=2):
-        if depth == max_depth:
-            return
-        if depth == 0:
-
-            print('')
-
-            print('')
-            print(f"Deep list analysis starting")
-            print('')
-
-        new_depth = depth + 1
-        print('Current depth:', depth)
-        next_level = []
-        for d in data:
-            if isinstance(d, list):
-                print(f"List: {len(d)}")
-                next_level.append(d)
-            # check if array
-            elif isinstance(d, np.ndarray):
-                print(f"Numpy array: {d.shape}")
-            else:
-                print(f"Data: {type(d)}")
-
-        print('')
-        for level in next_level:
-            self.deep_list_analysis(level, new_depth)
-
 
     def contains_features(self, mp_res):
         if not mp_res.pose_landmarks:

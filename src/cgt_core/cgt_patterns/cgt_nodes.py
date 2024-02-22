@@ -2,7 +2,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import List, Tuple, Any, Optional
 from ..cgt_utils.cgt_timers import timeit
-import logging
+
+from ..cgt_utils.cgt_logging import init
 
 
 class Node(ABC):
@@ -56,7 +57,6 @@ class NodeChainGroup(Node):
     def update(self, data: Any, frame: int) -> Tuple[Optional[Any], int]:
         """ Push data in their designed node chains. """
 
-        print(len(data), len(self.nodes))
         assert len(data) == len(self.nodes)
 
         updated_data = []
